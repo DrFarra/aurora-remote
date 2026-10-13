@@ -1,0 +1,51 @@
+name: Build iOS app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: xcode-27   # macOS 27 + Xcode 27 + SDK de iOS 27 (igual que Shield)
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generar proyecto Xcode
+        run: |
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Compilar (sin firmar)
+        run: |
+          xcodebuild -version
+          xcodebuild -project AuroraRemote.xcodeproj -target AuroraRemote -configuration Release \
+            -sdk iphoneos SYMROOT="$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            build | tee build.log | grep -E "error:|warning: .*AuroraRemote|BUILD" || true
+          test -d build/Release-iphoneos/AuroraRemote.app
+
+      - name: Empaquetar IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/Release-iphoneos/AuroraRemote.app Payload/
+          zip -qry Aurora.ipa Payload
+          ls -lh Aurora.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Aurora-ipa
+          path: Aurora.ipa
+
+      - name: Publicar release descargable
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "build-${{ github.run_number }}" Aurora.ipa \
+            --title "Aurora build ${{ github.run_number }}" \
+            --notes "IPA sin firmar. Instálala con Sideloadly (ver README)." --latest
