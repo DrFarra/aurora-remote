@@ -74,6 +74,18 @@ enum EffectPreview {
             }
             if (i * 7 + Int(t * 18)) % 23 == 0 { c = .white }               // chispas
             return scaled(c, 1)
+        case "Concierto":  // misma idea que en el PC con un ritmo simulado de 120 bpm
+            let beat = (t * 2).truncatingRemainder(dividingBy: 1) / 2
+            let bass = 0.15 + 0.85 * exp(-beat * 7)
+            let base0 = t * 0.12 + 0.27 * Double(Int(t * 2))               // gira y salta 1/3 en cada golpe
+            let d = Double(min(i, n - i)) / (Double(n) / 2)
+            let h = (base0 + Double(i) / Double(n)).truncatingRemainder(dividingBy: 1)
+            var c = Color(hue: h, saturation: 1, brightness: d <= bass * 1.05 ? 0.45 + 0.55 * bass : 0.12)
+            if beat < 0.6, max(0, 1 - abs(d - beat / 0.6) * 3) * (1 - beat / 0.6) > 0.3 {
+                c = Color(hue: (h + 0.5).truncatingRemainder(dividingBy: 1), saturation: 0.5, brightness: 1)
+            }
+            if (i * 7 + Int(t * 18)) % 23 == 0 { c = Color(hue: Double((i * 37) % 100) / 100, saturation: 0.35, brightness: 1) }
+            return scaled(c, 1)
         case "Temp. GPU":
             guard let temp = gpuTemp else { return scaled(base, 1) }
             let f = min(max((temp - 35) / 50, 0), 1)
@@ -100,6 +112,7 @@ enum EffectPreview {
         case "Visor": return "arrow.left.and.right"
         case "Ambiente": return "display"
         case "Música": return "music.note"
+        case "Concierto": return "party.popper.fill"
         default: return "lightbulb.fill"
         }
     }
@@ -119,6 +132,7 @@ enum EffectPreview {
         case "Visor": return "Barrido de luz"
         case "Ambiente": return "Color de la pantalla"
         case "Música": return "Sigue el sonido"
+        case "Concierto": return "Música a todo color"
         default: return ""
         }
     }
