@@ -257,6 +257,15 @@ struct ControlView: View {
 
     private var devicesCard: some View {
         GlassCard(title: "Dispositivos") {
+            if let live = state.ram_live {
+                Toggle(isOn: Binding(get: { live }, set: { store.change(["ram_live": $0]) })) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("RAM en tiempo real").font(.system(size: 15, weight: .medium))
+                        Text("Sigue las animaciones como los ventiladores").font(.system(size: 12)).foregroundStyle(Theme.muted)
+                    }
+                }
+                .tint(tint)
+            }
             ForEach(state.devices) { d in
                 HStack(spacing: 14) {
                     Image(systemName: deviceIcon(d.name))

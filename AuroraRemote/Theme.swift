@@ -50,6 +50,20 @@ enum EffectPreview {
             return scaled(base, 0.03 + 0.97 * w * w)
         case "Estrellas":
             return scaled(base, 0.06 + 0.94 * pow(max(0, sin(t * sp * 0.7 + Double(i) * 24.7)), 12))
+        case "Fuego":
+            let h = min(max(0.55 + 0.25 * sin(t * sp * 1.9 + Double(i) * 1.3) + 0.2 * sin(t * sp * 4.7 + Double(i) * 2.9 + 1), 0), 1)
+            return scaled(Color(red: min(1, h * 1.5), green: max(0, h - 0.35) * 1.4, blue: max(0, h - 0.85) * 3), 1)
+        case "Boreal":
+            let hue = 0.42 + 0.2 * sin(t * sp * 0.21 + Double(i) * 0.33) + 0.08 * sin(t * sp * 0.53 - Double(i) * 0.7)
+            let v = 0.3 + 0.7 * (0.5 + 0.5 * sin(t * sp * 0.6 - Double(i) * 0.45))
+            return scaled(Color(hue: hue, saturation: 0.9, brightness: v), 1)
+        case "Visor":
+            let pos = (0.5 + 0.5 * sin(t * sp * 1.1)) * Double(n - 1)
+            let d = abs(Double(i) - pos) / max(2.5, Double(n) / 6)
+            return scaled(base, 0.03 + 0.97 * max(0, 1 - d * d))
+        case "Música":  // en el iPhone no hay audio del PC: vista previa con un nivel simulado
+            let lvl = 0.25 + 0.55 * abs(sin(t * 2.3)) + 0.2 * abs(sin(t * 7.1))
+            return Double(i) < lvl * Double(n) ? scaled(base, 0.15 + 0.85 * lvl) : scaled(base, 0.04)
         case "Temp. GPU":
             guard let temp = gpuTemp else { return scaled(base, 1) }
             let f = min(max((temp - 35) / 50, 0), 1)
@@ -71,6 +85,11 @@ enum EffectPreview {
         case "Estrellas": return "sparkles"
         case "Temp. GPU": return "thermometer.medium"
         case "Apagado": return "power"
+        case "Fuego": return "flame.fill"
+        case "Boreal": return "moon.stars.fill"
+        case "Visor": return "arrow.left.and.right"
+        case "Ambiente": return "display"
+        case "Música": return "music.note"
         default: return "lightbulb.fill"
         }
     }
@@ -79,12 +98,17 @@ enum EffectPreview {
         switch effect {
         case "Estático": return "Color fijo"
         case "Respirar": return "Pulso suave"
-        case "Arcoíris": return "Espectro en movimiento"
+        case "Arcoíris": return "Espectro móvil"
         case "Ciclo": return "Todos los colores"
         case "Ola": return "Onda de brillo"
         case "Estrellas": return "Destellos"
         case "Temp. GPU": return "Según la temperatura"
         case "Apagado": return "Todo apagado"
+        case "Fuego": return "Llamas vivas"
+        case "Boreal": return "Aurora boreal"
+        case "Visor": return "Barrido de luz"
+        case "Ambiente": return "Color de la pantalla"
+        case "Música": return "Sigue el sonido"
         default: return ""
         }
     }
