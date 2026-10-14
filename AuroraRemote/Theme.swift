@@ -74,17 +74,18 @@ enum EffectPreview {
             }
             if (i * 7 + Int(t * 18)) % 23 == 0 { c = .white }               // chispas
             return scaled(c, 1)
-        case "Concierto":  // misma idea que en el PC con un ritmo simulado de 120 bpm
+        case "Concierto":  // como en el PC: color puro que salta en cada golpe (ritmo simulado de 120 bpm)
+            let palette = [0.0, 0.5, 0.83, 0.33, 0.66, 0.16]
             let beat = (t * 2).truncatingRemainder(dividingBy: 1) / 2
-            let bass = 0.15 + 0.85 * exp(-beat * 7)
-            let base0 = t * 0.12 + 0.27 * Double(Int(t * 2))               // gira y salta 1/3 en cada golpe
+            let bass = 0.1 + 0.9 * exp(-beat * 7)
+            let h = palette[Int(t * 2) % palette.count], accent = (h + 0.33).truncatingRemainder(dividingBy: 1)
             let d = Double(min(i, n - i)) / (Double(n) / 2)
-            let h = (base0 + Double(i) / Double(n)).truncatingRemainder(dividingBy: 1)
-            var c = Color(hue: h, saturation: 1, brightness: d <= bass * 1.05 ? 0.45 + 0.55 * bass : 0.12)
+            var c = d <= bass * 1.05 ? Color(hue: h, saturation: 1, brightness: 0.35 + 0.65 * bass) : Color.black
+            let pos = (t * 0.8).truncatingRemainder(dividingBy: 1) * Double(n)     // cometa de acento
+            if min(abs(Double(i) - pos), Double(n) - abs(Double(i) - pos)) < 1.5 { c = Color(hue: accent, saturation: 1, brightness: 1) }
             if beat < 0.6, max(0, 1 - abs(d - beat / 0.6) * 3) * (1 - beat / 0.6) > 0.3 {
-                c = Color(hue: (h + 0.5).truncatingRemainder(dividingBy: 1), saturation: 0.5, brightness: 1)
+                c = Color(hue: accent, saturation: 1, brightness: 1)               // onda del golpe
             }
-            if (i * 7 + Int(t * 18)) % 23 == 0 { c = Color(hue: Double((i * 37) % 100) / 100, saturation: 0.35, brightness: 1) }
             return scaled(c, 1)
         case "Temp. GPU":
             guard let temp = gpuTemp else { return scaled(base, 1) }
