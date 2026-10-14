@@ -61,9 +61,15 @@ enum EffectPreview {
             let pos = (0.5 + 0.5 * sin(t * sp * 1.1)) * Double(n - 1)
             let d = abs(Double(i) - pos) / max(2.5, Double(n) / 6)
             return scaled(base, 0.03 + 0.97 * max(0, 1 - d * d))
-        case "Música":  // en el iPhone no hay audio del PC: vista previa con un nivel simulado
-            let lvl = 0.25 + 0.55 * abs(sin(t * 2.3)) + 0.2 * abs(sin(t * 7.1))
-            return Double(i) < lvl * Double(n) ? scaled(base, 0.15 + 0.85 * lvl) : scaled(base, 0.04)
+        case "Música":  // el iPhone no oye el PC: misma animacion que Aurora con un ritmo simulado de 120 bpm
+            let beat = (t * 2).truncatingRemainder(dividingBy: 1) / 2          // segundos desde el ultimo golpe
+            let bass = 0.35 + 0.65 * exp(-beat * 6), mid = 0.5 + 0.5 * sin(t * 0.9)
+            let d = Double(min(i, n - i)) / (Double(n) / 2)                   // vumetro en espejo
+            var c = d <= bass * 1.05 ? Color(hue: (base.hue + 0.2 * mid * d).truncatingRemainder(dividingBy: 1),
+                                              saturation: 1, brightness: 0.25 + 0.75 * bass) : base.opacity(0.04)
+            if beat < 0.5, max(0, 1 - abs(d - beat / 0.5) * 5) * (1 - beat / 0.5) > 0.3 { c = .white }  // onda
+            if (i * 7 + Int(t * 18)) % 23 == 0 { c = .white }               // chispas
+            return scaled(c, 1)
         case "Temp. GPU":
             guard let temp = gpuTemp else { return scaled(base, 1) }
             let f = min(max((temp - 35) / 50, 0), 1)
