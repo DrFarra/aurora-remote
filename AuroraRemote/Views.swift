@@ -178,6 +178,21 @@ struct ControlView: View {
                     }
                 }
             }
+            // estilos de Concierto: solo con Concierto elegido, como en el PC
+            if state.effect == "Concierto", let styles = state.concert_styles, !styles.isEmpty {
+                Text("ESTILO DE CONCIERTO")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .tracking(1.2)
+                    .foregroundStyle(Theme.muted)
+                    .padding(.top, 4)
+                LazyVGrid(columns: grid, spacing: 12) {
+                    ForEach(styles, id: \.self) { name in
+                        EffectCard(name: name, selected: state.concert_style == name, tint: tint) {
+                            withAnimation(.snappy) { store.change(["concert_style": name]) }
+                        }
+                    }
+                }
+            }
         }
     }
 

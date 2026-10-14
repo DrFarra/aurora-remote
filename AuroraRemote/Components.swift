@@ -10,7 +10,8 @@ struct LEDRing: View {
             let t = ctx.date.timeIntervalSinceReferenceDate
             let base = Color(hex: state.color)
             let colors = (0..<count).map {
-                EffectPreview.color(effect: state.effect, base: base, t: t, i: $0, n: count, speed: state.speed,
+                EffectPreview.color(effect: state.effect == "Concierto" && state.concert_style == "Escenario"
+                                    ? "Escenario" : state.effect, base: base, t: t, i: $0, n: count, speed: state.speed,
                                     brightness: max(state.brightness, 15), gpuTemp: state.gpu?.temp)
             }
             ZStack {

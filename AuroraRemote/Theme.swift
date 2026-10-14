@@ -87,6 +87,30 @@ enum EffectPreview {
                 c = Color(hue: accent, saturation: 1, brightness: 1)               // onda del golpe
             }
             return scaled(c, 1)
+        case "Escenario":  // como en el PC: escenas con el color del acorde (circulo de quintas), ritmo de 120 bpm
+            let beat = (t * 2).truncatingRemainder(dividingBy: 1) / 2
+            let pulse = exp(-beat / 0.12)
+            let chords = [9, 5, 0, 7]                    // La menor, Fa, Do, Sol: cancion simulada en La menor
+            let k = Int(t / 4) % 4                       // una escena nueva cada 4 s (2 compases)
+            let keyHue = Double((9 * 7) % 12) / 12       // La
+            var hue = Double((chords[k] * 7) % 12) / 12
+            let x = Double(min(i, n - i)) / (Double(n) / 2)
+            let a = Double(i) / Double(max(n, 1))
+            var v: Double
+            switch k {
+            case 0:  // Abanico: en casa, todo respira con los golpes
+                v = 0.3 + 0.7 * pulse
+            case 1:  // Torbellino: medio anillo que gira
+                let rot = (t / 2).truncatingRemainder(dividingBy: 1)
+                v = pow(0.5 + 0.5 * cos(2 * .pi * (a - rot)), 2) * (0.6 + 0.4 * pulse)
+            case 2:  // Barrido: se llena de abajo arriba y se vacia
+                v = x <= 0.5 - 0.5 * cos(t * 1.6) ? 0.9 : 0.05
+            default:  // Pasos: el ventilador entero cambia de color en cada golpe
+                if Int(t * 2) % 2 == 1 { hue = keyHue }
+                v = 0.15 + 0.85 * pulse
+            }
+            if t.truncatingRemainder(dividingBy: 4) < 0.12 { return scaled(.white, 1) }  // fogonazo de escena
+            return scaled(Color(hue: hue, saturation: 1, brightness: pow(v, 1.6)), 1)
         case "Temp. GPU":
             guard let temp = gpuTemp else { return scaled(base, 1) }
             let f = min(max((temp - 35) / 50, 0), 1)
@@ -114,6 +138,8 @@ enum EffectPreview {
         case "Ambiente": return "display"
         case "Música": return "music.note"
         case "Concierto": return "party.popper.fill"
+        case "Fiesta": return "party.popper.fill"
+        case "Escenario": return "theatermasks.fill"
         default: return "lightbulb.fill"
         }
     }
@@ -134,6 +160,8 @@ enum EffectPreview {
         case "Ambiente": return "Color de la pantalla"
         case "Música": return "Sigue el sonido"
         case "Concierto": return "Música a todo color"
+        case "Fiesta": return "Color y cometas"
+        case "Escenario": return "Show de luces"
         default: return ""
         }
     }

@@ -11,6 +11,8 @@ struct RemoteState: Codable, Equatable {
     var scenes: [String: Scene]
     var gpu_sync: Bool
     var ram_live: Bool?  // opcional: Aurora antigua no lo envia
+    var concert_style: String?    // "Fiesta" o "Escenario" (Aurora antigua no lo envia)
+    var concert_styles: [String]?
     var devices: [Device]
     var gpu: GPU?
     var gpu_rgb: Bool
@@ -110,6 +112,7 @@ final class AuroraStore: ObservableObject {
             if let v = changes["speed"] as? Int { s.speed = v }
             if let v = changes["gpu_sync"] as? Bool { s.gpu_sync = v }
             if let v = changes["ram_live"] as? Bool { s.ram_live = v }
+            if let v = changes["concert_style"] as? String { s.concert_style = v }
             state = s
         }
         pending.merge(changes) { $1 }
